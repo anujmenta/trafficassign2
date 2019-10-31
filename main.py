@@ -83,14 +83,14 @@ def train(epoch):
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
-        # train_loss_track.append(loss.item())
-        # plt.figure(10)
-        # plt.plot(train_loss_track)
-        # plt.savefig('train_loss.png')
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                 100. * batch_idx / len(train_loader), loss.item()))
+    train_loss_track.append(loss.item())
+    plt.figure(10)
+    plt.plot(train_loss_track)
+    plt.savefig('train_loss.png')
 
 def validation():
     model.eval()
