@@ -22,7 +22,7 @@ nclasses = 43 # GTSRB as 43 classes
 #         x = self.fc2(x)
 #         return F.log_softmax(x)
 
-lass Net(nn.Module):
+class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 10, kernel_size=5)
