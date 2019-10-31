@@ -76,7 +76,7 @@ class Net(nn.Module):
         x = self.dropout(x)
         x = self.batchnorm2(F.max_pool2d(F.leaky_relu(self.conv2(x)),2))
         x = self.dropout(x)
-        x = self.batchnorm3(F.leaky_relu(self.conv3(x)))
+        x = self.batchnorm3(F.max_pool2d(F.leaky_relu(self.conv3(x)),2))
         x = self.dropout(x)
 
         x = x.view(-1, 250*3*3)
