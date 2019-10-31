@@ -68,7 +68,7 @@ class Net(nn.Module):
 
         return x
 
-   def forward(self, x):
+    def forward(self, x):
         bt_size = x.size(0)
 
         x = self.stn(x)
