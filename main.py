@@ -138,6 +138,7 @@ def validation():
     plt.figure(30)
     plt.plot(accuracy_track)
     plt.savefig('accuracy_track.png')
+    print(accuracy_track)
     print('\nValidation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         validation_loss, correct, len(val_loader.dataset),
         100. * correct / len(val_loader.dataset)))
