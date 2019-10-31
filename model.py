@@ -68,17 +68,19 @@ class Net(nn.Module):
 
         return x
 
-    def forward(self, x):
-        # transform the input
-        x = self.stn(x)
+   def forward(self, x):
         bt_size = x.size(0)
-        # Perform the usual forward pass
-        x = F.relu(F.max_pool2d(self.conv1(x), 2))
-        x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
-        print(bt_size)
-        x = x.view(-1, 3200)
+
+        x = self.stn(x)
+        x = self.batchnorm1(F.max_pool2d(F.leaky_relu(self.conv1(x)),2))
+        x = self.dropout(x)
+        x = self.batchnorm2(F.max_pool2d(F.leaky_relu(self.conv2(x)),2))
+        x = self.dropout(x)
+        x = self.batchnorm3(F.max_pool2d(F.leaky_relu(self.conv3(x)),2))
+        x = self.dropout(x)
+
+        x = x.view(-1, 250*2*2)
         x = F.relu(self.fc1(x))
         x = F.dropout(x, training=self.training)
         x = self.fc2(x)
-        print(x.size(0))
         return F.log_softmax(x, dim=1)
