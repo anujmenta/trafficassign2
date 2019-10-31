@@ -30,7 +30,7 @@ class Net(nn.Module):
         self.conv2 = nn.Conv2d(100, 200, kernel_size=3)
         self.batchnorm2 = nn.BatchNorm2d(200)
         self.conv3 = nn.Conv2d(200, 250, kernel_size=1)
-        self.batchnorm3 = nn.BatchNorm1d(250)
+        self.batchnorm3 = nn.BatchNorm2d(250)
         self.dropout = nn.Dropout2d()
         self.fc1 = nn.Linear(250*3*3, 150)
         self.fc2 = nn.Linear(150, nclasses)
@@ -76,7 +76,7 @@ class Net(nn.Module):
         x = self.dropout(x)
         x = self.batchnorm2(F.max_pool2d(F.leaky_relu(self.conv2(x)),2))
         x = self.dropout(x)
-        x = self.batchnorm3(F.max_pool2d(F.leaky_relu(self.conv3(x)),2))
+        x = self.batchnorm3(F.leaky_relu(self.conv3(x)))
         x = self.dropout(x)
 
         x = x.view(-1, 250*3*3)
