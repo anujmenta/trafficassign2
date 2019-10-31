@@ -26,10 +26,14 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 100, kernel_size=5)
-        self.conv2 = nn.Conv2d(100, 200, kernel_size=5)
-        self.conv2_drop = nn.Dropout2d()
-        self.fc1 = nn.Linear(3200, 200)
-        self.fc2 = nn.Linear(200, nclasses)
+        self.batchnorm1 = nn.BatchNorm2d(100)
+        self.conv2 = nn.Conv2d(100, 200, kernel_size=3)
+        self.batchnorm2 = nn.BatchNorm2d(200)
+        self.conv3 = nn.Conv2d(200, 250, kernel_size=3)
+        self.batchnorm3 = nn.BatchNorm2d(250)
+        self.dropout = nn.Dropout2d()
+        self.fc1 = nn.Linear(250*2*2, 150)
+        self.fc2 = nn.Linear(150, nclasses)
 
         # Spatial transformer localization-network
         self.localization = nn.Sequential(
