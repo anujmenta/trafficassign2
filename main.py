@@ -14,7 +14,7 @@ parser.add_argument('--data', type=str, default='data', metavar='D',
                     help="folder where data is located. train_data.zip and test_data.zip need to be found in the folder")
 parser.add_argument('--batch-size', type=int, default=64, metavar='N',
                     help='input batch size for training (default: 64)')
-parser.add_argument('--epochs', type=int, default=10, metavar='N',
+parser.add_argument('--epochs', type=int, default=30, metavar='N',
                     help='number of epochs to train (default: 10)')
 parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                     help='learning rate (default: 0.01)')
@@ -84,6 +84,7 @@ if use_gpu:
     model.cuda()
 
 optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=5, factor=0.5)
 
 train_loss_track = []
 val_loss_track = []
@@ -127,9 +128,12 @@ def validation():
 
     validation_loss /= len(val_loader.dataset)
     val_loss_track.append(validation_loss)
+    scheduler.step(validation_loss)
+    #plot validation loss
     plt.figure(20)
     plt.plot(val_loss_track)
     plt.savefig('val_loss.png')
+    #plot accuracy
     accuracy_track.append(100. * correct / len(val_loader.dataset))
     plt.figure(30)
     plt.plot(accuracy_track)
