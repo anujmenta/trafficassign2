@@ -36,8 +36,9 @@ def pil_loader(path):
     with open(path, 'rb') as f:
         with Image.open(f) as img:
             return img.convert('RGB')
+from data import data_transform_rotate, data_transform_colorjitter_brightness, data_transform_colorjitter_saturation, data_transform_colorjitter_contrast, data_transform_colorjitter_hue
 
-
+data_transforms = [data_transform_rotate, data_transform_colorjitter_brightness, data_transform_colorjitter_saturation, data_transform_colorjitter_contrast, data_transform_colorjitter_hue]
 output_file = open(args.outfile, "w")
 output_file.write("Filename,ClassId\n")
 for f in tqdm(os.listdir(test_dir)):
