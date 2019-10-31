@@ -103,10 +103,13 @@ def train(epoch):
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
-        if batch_idx % args.log_interval == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), loss.item()))
+        # if batch_idx % args.log_interval == 0:
+        #     print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+        #         epoch, batch_idx * len(data), len(train_loader.dataset),
+        #         100. * batch_idx / len(train_loader), loss.item()))
+    print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+        epoch, batch_idx * len(data), len(train_loader.dataset),
+        100. * batch_idx / len(train_loader), loss.item()))
     train_loss_track.append(loss.item())
     plt.figure(10)
     plt.plot(train_loss_track)
@@ -134,12 +137,12 @@ def validation():
     plt.plot(val_loss_track)
     plt.savefig('val_loss.png')
     #plot accuracy
-    accuracy_track.append(100. * correct / len(val_loader.dataset))
+    accuracy_track.append(float(100. * correct / len(val_loader.dataset)))
     plt.figure(30)
     plt.plot(accuracy_track)
     plt.savefig('accuracy_track.png')
     print(accuracy_track)
-    print('Best accuracy on epoch {}'.format(max(accuracy_track).index(accuracy_track)))
+    print('Best accuracy on epoch {}'.format(accuracy_track.index(max(accuracy_track))))
     print('\nValidation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         validation_loss, correct, len(val_loader.dataset),
         100. * correct / len(val_loader.dataset)))
