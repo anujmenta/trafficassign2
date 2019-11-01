@@ -14,9 +14,9 @@ parser.add_argument('--data', type=str, default='data', metavar='D',
                     help="folder where data is located. train_data.zip and test_data.zip need to be found in the folder")
 parser.add_argument('--batch-size', type=int, default=64, metavar='N',
                     help='input batch size for training (default: 64)')
-parser.add_argument('--epochs', type=int, default=10, metavar='N',
+parser.add_argument('--epochs', type=int, default=30, metavar='N',
                     help='number of epochs to train (default: 10)')
-parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
+parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
                     help='learning rate (default: 0.01)')
 parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
                     help='SGD momentum (default: 0.5)')
@@ -24,6 +24,7 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='how many batches to wait before logging training status')
+parser.add_argument('--numworkers', type=int, default=4)
 args = parser.parse_args()
 
 torch.manual_seed(args.seed)
@@ -43,12 +44,30 @@ train_loader = torch.utils.data.DataLoader(
     torch.utils.data.ConcatDataset(
     [
     datasets.ImageFolder(args.data + '/train_images', transform=data_transforms),
-    datasets.ImageFolder(args.data + '/train_images', transform=data_transform_rotate),
+    datasets.ImageFolder(args.data + '/train_images', transform=data_transform_rotate1),
+    # datasets.ImageFolder(args.data + '/train_images', transform=data_transform_rotate2),
     datasets.ImageFolder(args.data + '/train_images', transform=data_transform_colorjitter_brightness),
     datasets.ImageFolder(args.data + '/train_images', transform=data_transform_colorjitter_saturation),
     datasets.ImageFolder(args.data + '/train_images', transform=data_transform_colorjitter_contrast),
-    datasets.ImageFolder(args.data + '/train_images', transform=data_transform_colorjitter_hue)
-    ]),batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=use_gpu)
+    datasets.ImageFolder(args.data + '/train_images', transform=data_transform_colorjitter_hue),
+    datasets.ImageFolder(args.data + '/train_images', transform=data_transform_grayscale),
+    # datasets.ImageFolder(args.data + '/train_images', transform=data_transform_pad),
+    datasets.ImageFolder(args.data + '/train_images', transform=data_transform_centercrop),
+    datasets.ImageFolder(args.data + '/train_images', transform=data_transform_shear),
+    datasets.ImageFolder(args.data + '/train_images', transform=data_transform_hrflip),
+    datasets.ImageFolder(args.data + '/train_images', transform=data_transform_vrflip),
+    # datasets.ImageFolder(args.data + '/train_images', transform=data_transform_bothflip),
+    datasets.ImageFolder(args.data + '/train_images', transform=data_transform_translate),
+    # datasets.ImageFolder(args.data + '/train_images', transform=data_transform_colorjitter_brightness_hflip),
+    # datasets.ImageFolder(args.data + '/train_images', transform=data_transform_colorjitter_saturation_hflip),
+    # datasets.ImageFolder(args.data + '/train_images', transform=data_transform_colorjitter_contrast_hflip),
+    # datasets.ImageFolder(args.data + '/train_images', transform=data_transform_colorjitter_brightness_vflip),
+    # datasets.ImageFolder(args.data + '/train_images', transform=data_transform_colorjitter_saturation_vflip),
+    # datasets.ImageFolder(args.data + '/train_images', transform=data_transform_colorjitter_contrast_vflip),
+    # datasets.ImageFolder(args.data + '/train_images', transform=data_transform_randomperspective),
+    # datasets.ImageFolder(args.data + '/train_images', transform=data_transform_vflip_rotation),
+    # datasets.ImageFolder(args.data + '/train_images', transform=data_transform_hflip_rotation),
+    ]),batch_size=args.batch_size, shuffle=True, num_workers=args.numworkers, pin_memory=use_gpu)
 
 
 val_loader = torch.utils.data.DataLoader(
@@ -64,7 +83,9 @@ model = Net()
 if use_gpu:
     model.cuda()
 
-optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
+#optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
+optimizer = optim.Adam(model.parameters(), lr=args.lr)
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=5, factor=0.5)
 
 train_loss_track = []
 val_loss_track = []
@@ -87,6 +108,9 @@ def train(epoch):
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                 100. * batch_idx / len(train_loader), loss.item()))
+    # print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+    #     epoch, batch_idx * len(data), len(train_loader.dataset),
+    #     100. * batch_idx / len(train_loader), loss.item()))
     train_loss_track.append(loss.item())
     plt.figure(10)
     plt.plot(train_loss_track)
@@ -108,13 +132,18 @@ def validation():
 
     validation_loss /= len(val_loader.dataset)
     val_loss_track.append(validation_loss)
+    scheduler.step(validation_loss)
+    #plot validation loss
     plt.figure(20)
     plt.plot(val_loss_track)
     plt.savefig('val_loss.png')
-    accuracy_track.append(100. * correct / len(val_loader.dataset))
+    #plot accuracy
+    accuracy_track.append(float(100. * correct / len(val_loader.dataset)))
     plt.figure(30)
     plt.plot(accuracy_track)
     plt.savefig('accuracy_track.png')
+    print(accuracy_track)
+    print('Best accuracy on epoch {}'.format(accuracy_track.index(max(accuracy_track))))
     print('\nValidation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         validation_loss, correct, len(val_loader.dataset),
         100. * correct / len(val_loader.dataset)))
