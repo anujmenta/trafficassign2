@@ -2,6 +2,8 @@
 
 ### Assignment 2: Traffic sign competition
 
+Continued from : https://github.com/anujmenta/traffic-sign-detection-homework
+
 #### Requirements
 1. Install PyTorch from http://pytorch.org
 
